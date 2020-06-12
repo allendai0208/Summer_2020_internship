@@ -1,8 +1,6 @@
 import numpy as np 
 from matplotlib import pyplot as plt
-import math
 
-# Set a random seed
 np.random.seed(0)
 
 # Initialize an environment
@@ -19,23 +17,24 @@ reward_table = {user: np.random.choice(10, size=num_ads) for user in range(num_u
 
 # Implement IPS 
 class IPS:
-    def __init__(self):
-        self.estimates = list()
-            
-    def get_estimate(self, context, action, old_policy_prob, new_policy_prob, reward):
-        """
-        Append the IPS estimate of a single sample to self.estimates.
-        You should implement this function
-        """
-        self.estimates.append(new_policy_prob / old_policy_prob * reward)
+    def __init__(self, trace):
+        self.trace = trace
+    
+    def get_estimate(self):
+        latest = {}
+        for sample in reversed(self.trace):
+            if (sample[0], sample[1]) not in latest:
+                latest[(sample[0],sample[1])] = (sample[2], sample[3],sample[4])
+        n = len(latest)
+        total = 0
+        for valid_IPS_sample in latest:
+            weight = latest[valid_IPS_sample][1]/latest[valid_IPS_sample][0]
+            reward = latest[valid_IPS_sample][2]
+            total += weight*reward
+        return total / n
+                
 
-    def evaluation(self, num_samples):
-        """
-        Get the mean of num_samples number of IPS estimates
-        """
-        return np.mean(self.estimates[:num_samples])
-
-# Policies:
+# Three policies    
 class UniformlyRandom:
     def __init__(self, num_actions):
         """
@@ -43,7 +42,7 @@ class UniformlyRandom:
         """
         self.num_actions = num_actions 
 
-    def choose_action(self, context):
+    def choose_action(self, context ):
         """
         return a chosen action and action-probabilities
         """
@@ -53,24 +52,31 @@ class UniformlyRandom:
         """
         UniformlyRandom is a stateless policy, which means it does not update itself
         based on the past rewards revelaed by it.
+
         (parameters)
         cb_sample: a tuple of (context, chosen action, reward revealed)
         """
         pass
 
+    def toString(self):
+        return 'UniformlyRandom'
+
 class EpsilonGreedy:
-    def __init__(self, num_actions, num_contexts, epsilon=0.1):
+    def __init__(self, num_actions, num_contexts, epsilon=0.2):
         """
         This is a CB verision of epsilon greedy
+
         (parameters)
         num_actions: number of actions (= number of ads)
         num_contexts: number of contexts (= number of users)
         epsilon: this policy chooeses a random action with epsilon probability 
+
         (Stored values)
         self.num_actions = num_actions 
         self.num_contexts = num_contexts
         self.num_actions_chosen: keep track of how many times each action is chosen for each context
         self.sum_rewards: keep track of the total reward of each action for each context
+
         The reason why self.num_actions_chosen is initialized with np.ones instead of np.zeros is
         to prevent division by zero in the function choose_action (line 68) 
         when an action has never been chosen so far for a given context.
@@ -88,6 +94,7 @@ class EpsilonGreedy:
         # Check which action is the best action 
         # The best action is the action that has the highest total reward for a given context
         best_action = np.argmax(self.sum_rewards[context] / self.num_actions_chosen[context])
+        #best_action = np.argmax(self.sum_rewards)
 
         # Get action probabilities based on the best action
         # there is a (epsilon + epsilon/num_actions) probability of choosing the best action.
@@ -108,6 +115,7 @@ class EpsilonGreedy:
         EpsilonGreedy is a stateful policy, which means it does update itself
         based on the past rewards revelaed by it.
         Thus, update function is necessary.
+
         (parameters)
         cb_sample: a tuple of (context, chosen action, reward revealed)
         """
@@ -115,16 +123,16 @@ class EpsilonGreedy:
 
         self.sum_rewards[context][chosen_action] += reward_revealed
 
+    def toString(self):
+        return 'EpsilonGreedy'
+
 # Implement your own simple stochastic policy (This should be different form the uniformly random policy)
 class StochasticPolicy:
-    def __init__(self, num_actions):
-        self.num_actions = num_actions
+    def __init__(self):
+        pass
 
     def choose_action(self, context):
-        action_probabilities = [0.2, 0.1, 0.05, 0.05, 0.1, 0.12, 0.03, 0.07, 0.08, 0.2]
-        chosen_action = np.random.choice(self.num_actions, p=action_probabilities)
-
-        return chosen_action, action_probabilities
+        pass
 
     def update(self, cb_sample):
         pass
@@ -135,28 +143,27 @@ class DeterministicPolicy:
         self.num_actions = num_actions
 
     def choose_action(self, context):
-        return 0, [1] + [0] * (self.num_actions - 1)
+        action_probabilities = np.zeros(self.num_actions)
+        action_probabilities[0] = 1
+        return 0, action_probabilities
 
     def update(self, cb_sample):
         pass
 
 # Initialize policies
-epsilon = 0.1 # epsilon is a tunable parameter
+epsilon = 0.3 # epsilon is a tunable parameter
 
 uni_ran = UniformlyRandom(num_ads)
 eps_greedy = EpsilonGreedy(num_ads, num_users, epsilon=epsilon)
-stochastic = StochasticPolicy(num_ads)
-deterministic = DeterministicPolicy(num_ads)
 
 # Start the demo
 num_samples = 1000000 # total number of samples. Feel free to change this if you want to
-trace = list()
+trace = list() # list to store each CB tuple of (context, chosen action, action probability, reward revealed)
 new_policy_true_rewards = list() # Keep track of true rewards revealed by the new policy
 
 # Implement the demo as specified by the comments below
-old_policy = eps_greedy
-new_policy = deterministic
-ips_estimator = IPS()
+old_policy = uni_ran
+new_policy = eps_greedy
 
 for sample_index in range(num_samples): 
     # Context (user) revealed
@@ -172,21 +179,14 @@ for sample_index in range(num_samples):
     new_chosen_action, new_probabilities = new_policy.choose_action(user)
 
     # Record the reward revealed by the new policy to get the true performance of the new policy
-    new_policy_true_rewards.append(reward_table[user][new_chosen_action])
+    new_policy_true_rewards.append(new_chosen_action)
 
-    # Store the CB sample in trace 
+    # Store the CB sample in trace for evaluation
     trace.append((user, 
-                 old_chosen_action, 
-                 old_probabilities[old_chosen_action], 
-                 new_probabilities[old_chosen_action], 
-                 reward))
-
-    # Store the estimate for evaluation
-    ips_estimator.get_estimate(user, 
-                               old_chosen_action, 
-                               old_probabilities[old_chosen_action], 
-                               new_probabilities[old_chosen_action], 
-                               reward)
+                  old_chosen_action, 
+                  old_probabilities[old_chosen_action], 
+                  new_probabilities[new_chosen_action], 
+                  reward))
 
     # Update the old policy if needed
     old_policy.update((user, old_chosen_action, reward))
@@ -198,40 +198,12 @@ for sample_index in range(num_samples):
 # the true expected value using the environment defined at the beginning.
 true_performance = np.mean(new_policy_true_rewards)
 
-# Now you have the list of every IPS estimate you have got in self.estimates of ips_estimator.
-# Use the list to solve the problems.
-LOG_SCALE = 6 
-estimate = []
-for i in range(1,LOG_SCALE+1):
-    estimate.append(ips_estimator.evaluation(int(math.pow(10, i))))
+# Implement a code to get IPS estimates using the trace
+ips = IPS(trace)
+estimate = ips.get_estimate()
+print('IPS(' + old_policy.toString() + ', ' + new_policy.toString() + ') = ' + str(estimate))
 
-estimates = [estimate]
-print('estimate:',estimate[LOG_SCALE-1])
-print('true performance:',true_performance)
-
-# Run bootstrap
-for i in range(19):
-    #new_trace = trace[np.random.choice(len(trace), size=len(trace))]
-    new_trace = [trace[i] for i in np.random.choice(len(trace), size=len(trace))]
-    bootstrap_ips = IPS()
-    estimate = []
-    for sample in new_trace:
-        bootstrap_ips.get_estimate(sample[0], sample[1], sample[2], sample[3], sample[4])
-    for j in range(LOG_SCALE):
-        estimate.append(bootstrap_ips.evaluation(int(math.pow(10, j))))
-    estimates.append(estimate)
-
-errors = [[(true_performance - x) / true_performance for x in row] for row in estimates]
-
-mean_errors = np.mean(errors, axis=0)
-std = np.std(errors, axis=0)
-x = [math.pow(10, i) for i in range(1, LOG_SCALE+1)]
-
-plt.errorbar(x, mean_errors, yerr=std, linewidth=0.5, marker='x')
-
-plt.title('IPS on (eps_greedy, deterministic)')
-plt.ylabel('Mean errors')
-plt.xlabel('Number of samples (log10)')
-plt.xscale('log')
-
-plt.show()
+# results:
+#   IPS(UniformlyRandom, EpsilonGreedy) = 22.599999999999994
+#   IPS(UniformlyRandom, StochasticPolicy)
+#   IPS(UniformlyRandom, DeterministicPolicy)

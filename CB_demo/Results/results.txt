@@ -1,0 +1,9 @@
+Results:
+
+(old_policy, new_policy)                 IPS              true_performance
+----------------------------------------------------------------------------
+(eps_greedy, uni_ran)             4.403580879120878           4.398731
+(uni_ran, stochastic)             4.199982299999999           4.200631
+(uni_ran, deterministic)          5.60079                     5.599465
+(eps_greedy, stochastic)          4.2138730989011             4.202313
+(eps_greedy, deterministic)       5.536682417582419           5.600175
