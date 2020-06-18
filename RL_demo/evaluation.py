@@ -14,7 +14,7 @@ if __name__ == "__main__":
     num_requests = 15 #int(input("num_requests: "))
     num_servers = 4   #int(input("num_servers: "))
     threshold = int(sys.argv[1])#int(input("threshold: "))
-    # num_trajectories_list = [0] + [10 ** i for i in range(1, 7)]
+    #num_trajectories_list = [0] + [10 ** i for i in range(1, 7)]
     num_trajectories_list = [0] + [10 ** i for i in range(1, 6)]
     start_trajectory_index = 0
     # end_trajectory_index = 1
@@ -166,7 +166,6 @@ if __name__ == "__main__":
 
             plt.show()
 
-        print(stepWIS_errors)
 
 
 
