@@ -11,8 +11,8 @@ from matplotlib.transforms import ScaledTranslation
 if __name__ == "__main__":
     # Initialize basic variables
     num_seeds = 5     #int(input("num_seeds: "))
-    num_requests = 15 #int(input("num_requests: "))
-    num_servers = 4   #int(input("num_servers: "))
+    num_requests = 5 #int(input("num_requests: "))
+    num_servers = 3   #int(input("num_servers: "))
     threshold = int(sys.argv[1])#int(input("threshold: "))
     #num_trajectories_list = [0] + [10 ** i for i in range(1, 7)]
     num_trajectories_list = [0] + [10 ** i for i in range(1, 6)]
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         WIS_errors = [[[] for _ in range(len(num_trajectories_list) - 1)] for _ in range(num_seeds)]   
         stepWIS_errors = [[[] for _ in range(len(num_trajectories_list) - 1)] for _ in range(num_seeds)]   
 
-        cumulative_latency_per_policy = np.zeros(num_target_policies)
+        cumulative_latency_per_policy = [np.zeros(num_target_policies) for _ in range(num_seeds)]
 
         # Iterate over number of trajectories
         for num_trajectories_index in range(1, len(num_trajectories_list)):
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                     """
                     Implement
                     """
-                    cumulative_latency_per_policy += total_latency_for_each_policy[:-1]
+                    cumulative_latency_per_policy[seed-seed_add] += total_latency_for_each_policy[:-1]
                     seed_evaluation.evaluate_one_trajectory(trace)
 
                 for policy_index in range(num_target_policies):
@@ -116,7 +116,8 @@ if __name__ == "__main__":
                     WIS_estimates_per_seed[policy_index] = seed_evaluation.get_WIS_estimates(policy_index)
                     stepWIS_estimates_per_seed[policy_index] = seed_evaluation.get_stepWIS_estimates(policy_index)
 
-                    true_performance = cumulative_latency_per_policy[policy_index]/num_trajectories_list[num_trajectories_index]
+                    true_performance = cumulative_latency_per_policy[seed-seed_add][policy_index]/num_trajectories_list[num_trajectories_index]
+                    #print(true_performance)
 
                     IS_errors_per_seed[policy_index] = (true_performance - IS_estimates_per_seed[policy_index]) / true_performance
                     stepIS_errors_per_seed[policy_index] = (true_performance - stepIS_estimates_per_seed[policy_index]) / true_performance
@@ -131,10 +132,10 @@ if __name__ == "__main__":
         # After finishing iterating over every random seed,
         # display the estimate of each target policy for the given number of trajectories
         
-        IS_mean_errors = np.mean(IS_errors, axis=0)
-        stepIS_mean_errors = np.mean(stepIS_errors, axis=0)
-        WIS_mean_errors = np.mean(WIS_errors, axis=0)
-        stepWIS_mean_errors = np.mean(stepWIS_errors, axis=0)
+        IS_mean_errors = abs(np.mean(IS_errors, axis=0))
+        stepIS_mean_errors = abs(np.mean(stepIS_errors, axis=0))
+        WIS_mean_errors = abs(np.mean(WIS_errors, axis=0))
+        stepWIS_mean_errors = abs(np.mean(stepWIS_errors, axis=0))
         
         IS_std = np.std(IS_errors, axis=0)
         stepIS_std = np.std(stepIS_errors, axis=0)

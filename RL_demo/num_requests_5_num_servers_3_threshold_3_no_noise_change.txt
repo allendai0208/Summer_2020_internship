@@ -1,25 +1,19 @@
 
 num_seeds: 5
 num_trajectory: 10
-num_requests: 15
-num_servers: 4
+num_requests: 5
+num_servers: 3
 behavior policy: UniRan
 target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'EpsilonGreedy', 'UCB1']
 num_seeds: 5
 num_trajectory: 100
-num_requests: 15
-num_servers: 4
+num_requests: 5
+num_servers: 3
 behavior policy: UniRan
 target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'EpsilonGreedy', 'UCB1']
 num_seeds: 5
 num_trajectory: 1000
-num_requests: 15
-num_servers: 4
-behavior policy: UniRan
-target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'EpsilonGreedy', 'UCB1']
-num_seeds: 5
-num_trajectory: 10000
-num_requests: 15
-num_servers: 4
+num_requests: 5
+num_servers: 3
 behavior policy: UniRan
 target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'EpsilonGreedy', 'UCB1']
