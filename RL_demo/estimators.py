@@ -54,13 +54,6 @@ class Evaluation:
 
         return 
 
-
-    def get_IS_estimates(self, policy_index):
-        sum_rewards_by_trajectory = np.sum(self.rewards, axis = 1)
-        product_rhos_by_trajectory = np.prod([row[policy_index] for row in self.per_step_importance_ratios], axis=1)
-        IS_estimate_by_trajectory = product_rhos_by_trajectory * sum_rewards_by_trajectory
-        return np.mean(IS_estimate_by_trajectory)
-
     def get_rolling_product(self, A):
         prod = 1
         B = []
@@ -68,6 +61,16 @@ class Evaluation:
             prod *= elem
             B.append(prod)
         return B
+
+    def get_IS_estimates(self, policy_index):
+        sum_rewards_by_trajectory = np.sum(self.rewards, axis = 1) 
+        product_rhos_by_trajectory = np.prod([row[policy_index] for row in self.per_step_importance_ratios], axis=1)
+        IS_estimate_by_trajectory = np.multiply(product_rhos_by_trajectory,sum_rewards_by_trajectory)
+        #print('sum_rewards_by_trajectory:',sum_rewards_by_trajectory)
+        #print('product_rhos_by_trajectory:',product_rhos_by_trajectory)
+        #print('IS_estimate_by_trajectory(', policy_index,'):',np.mean(IS_estimate_by_trajectory))
+        return np.mean(IS_estimate_by_trajectory)
+
 
     def get_stepIS_estimates(self, policy_index):
         new_per_step_importance_ratios = [self.get_rolling_product(row[policy_index]) for row in self.per_step_importance_ratios]
@@ -91,5 +94,3 @@ class Evaluation:
                                             for t in range(len(self.rewards))]
         stepWIS_estimate_by_trajectory = [np.dot(self.rewards[t], new_importance_weights[t]) for t in range(len(self.rewards))]
         return np.mean(stepWIS_estimate_by_trajectory)
-    
-
