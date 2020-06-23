@@ -15,23 +15,25 @@ if __name__ == "__main__":
     num_servers = 3   #int(input("num_servers: "))
     threshold = int(sys.argv[1])#int(input("threshold: "))
     #num_trajectories_list = [0] + [10 ** i for i in range(1, 7)]
-    num_trajectories_list = [0] + [10 ** i for i in range(1, 7)]
+    num_trajectories_list = [0] + [10 ** i for i in range(1, 6)]
     start_trajectory_index = 0
     # end_trajectory_index = 1
     #noise_type = 'increasing_variance'
 
     # Initialize policies
+    '''
     behavior_policy = ('UniRan', UniRan(num_servers))
     target_policy1 = ('LeastLoad_0.3', LeastLoad(num_servers, epsilon=0.3))
     target_policy2 = ('LeastLoad_0', LeastLoad(num_servers, epsilon=0))
     target_policy3 = ('EpsilonGreedy', EpsilonGreedy(num_servers, epsilon=0.3))
     target_policy4 = ('UCB1', UCB1(num_servers))
+    '''
 
-    #behavior_policy = ('EpsilonGreedy', EpsilonGreedy(num_servers, epsilon=0.3))
-    #target_policy1 = ('LeastLoad_0.3', LeastLoad(num_servers, epsilon=0.3))
-    #target_policy2 = ('LeastLoad_0', LeastLoad(num_servers, epsilon=0))
-    #target_policy3 = ('UniRan', UniRan(num_servers))
-    #target_policy4 = ('UCB1', UCB1(num_servers))
+    behavior_policy = ('EpsilonGreedy', EpsilonGreedy(num_servers, epsilon=0.3))
+    target_policy1 = ('LeastLoad_0.3', LeastLoad(num_servers, epsilon=0.3))
+    target_policy2 = ('LeastLoad_0', LeastLoad(num_servers, epsilon=0))
+    target_policy3 = ('UniRan', UniRan(num_servers))
+    target_policy4 = ('UCB1', UCB1(num_servers))
 
 
     target_policies = [target_policy1, target_policy2, target_policy3, target_policy4]
@@ -142,7 +144,7 @@ if __name__ == "__main__":
         WIS_std = np.std(WIS_errors, axis=0)
         stepWIS_std = np.std(stepWIS_errors, axis=0)
 
-        x = [math.pow(10, i) for i in range(1, 7)]
+        x = [math.pow(10, i) for i in range(1, 6)]
 
         for policy_index in range(num_target_policies):
             fig, ax = plt.subplots()

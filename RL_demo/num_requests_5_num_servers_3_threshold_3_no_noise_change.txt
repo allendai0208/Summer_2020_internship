@@ -1,0 +1,31 @@
+
+num_seeds: 5
+num_trajectory: 10
+num_requests: 5
+num_servers: 3
+behavior policy: EpsilonGreedy
+target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'UniRan', 'UCB1']
+num_seeds: 5
+num_trajectory: 100
+num_requests: 5
+num_servers: 3
+behavior policy: EpsilonGreedy
+target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'UniRan', 'UCB1']
+num_seeds: 5
+num_trajectory: 1000
+num_requests: 5
+num_servers: 3
+behavior policy: EpsilonGreedy
+target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'UniRan', 'UCB1']
+num_seeds: 5
+num_trajectory: 10000
+num_requests: 5
+num_servers: 3
+behavior policy: EpsilonGreedy
+target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'UniRan', 'UCB1']
+num_seeds: 5
+num_trajectory: 100000
+num_requests: 5
+num_servers: 3
+behavior policy: EpsilonGreedy
+target policies: ['LeastLoad_0.3', 'LeastLoad_0', 'UniRan', 'UCB1']

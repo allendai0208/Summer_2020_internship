@@ -32,11 +32,12 @@ class Evaluation:
 
             # sample[0] is an array of the server_load and (action, reward) revealed by each time step
             # sample[1] is the action taken at each time step
-            # sample[2] is the reward at each time step
+            # sample[2] is the reward of the action 
             # sample[3] is an array of action probabilities in each time step
             for sample in trajectory:
                 action = sample[1]
-                reward = sample[2]
+                for sample_action, sample_reward in sample[0][1]:
+                    policy.update(sample_action, sample_reward)
 
                 importance_ratio = policy.choose_action(context=sample[0][0], return_prob=True, behavior_policy=False, chosen_action=action)[action] / sample[3][action]               
                 trajectory_per_step_importance_ratios[policy_index].append(importance_ratio)
@@ -45,7 +46,7 @@ class Evaluation:
                     (self.avg_cumulative_importance_ratios[policy_index][num_action-1] * (self.num_trajectories - 1) + np.prod(trajectory_per_step_importance_ratios[policy_index])) / self.num_trajectories
                 
                 num_action += 1
-                policy.update(action, reward) 
+                #policy.update(action, reward) 
 
             policy.reset()
         
