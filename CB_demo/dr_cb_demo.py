@@ -67,10 +67,10 @@ class DR:
         Append the DR estimate of a single sample to self.estimates.
         You should implement this function
         """
-        self.update_Q(context, action, reward)
         r_estimate = np.sum([prob * q for prob,q in zip(new_probabilities, self.Q[context][:])])
         DR_estimate = r_estimate + new_probabilities[action]/old_probability * (reward - self.Q[context, action])
         self.estimates.append(DR_estimate)
+        self.update_Q(context, action, reward)
 
     def evaluation(self, num_samples):
         """
@@ -121,12 +121,12 @@ class DRVW:
         Append the DR estimate of a single sample to self.estimates.
         You should implement this function
         """
-        self.update_Q(context, action, reward)
         r_estimate = 0 
         for i in range(len(new_probabilities)):
             r_estimate += new_probabilities[i] * self.get_Q(context, i)
         DR_estimate = r_estimate + new_probabilities[action]/old_probability * (reward - self.get_Q(context, action))
         self.estimates.append(DR_estimate)
+        self.update_Q(context, action, reward)
 
     def evaluation(self, num_samples):
         """

@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import softmax
+#from scipy.special import softmax
 # from vowpalwabbit import pyvw
 
 # Stationary CB policies
